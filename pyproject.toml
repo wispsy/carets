@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "A dependency-free asyncio TUI toolkit for Python"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "Wispsy"}]
 dependencies = []
 
@@ -17,4 +17,3 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
