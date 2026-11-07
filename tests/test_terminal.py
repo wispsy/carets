@@ -78,8 +78,26 @@ class TerminalTests(unittest.IsolatedAsyncioTestCase):
         await Program(Model(), terminal=TerminalSession(io.BytesIO(), output, backend=backend)).run([])
         self.assertEqual(output.getvalue(), "")
         self.assertEqual(backend.restored, [])
+
+    async def test_owned_input_closes_before_terminal_restores(self):
+        calls = []
+        backend = Backend()
+        original_restore = backend.restore_raw
+        def restore(state):
+            calls.append("terminal")
+            original_restore(state)
+        backend.restore_raw = restore
+        class Source:
+            def __aiter__(self): return self
+            async def __anext__(self): raise StopAsyncIteration
+            def close(self): calls.append("input")
+        class Model:
+            def update(self, message): pass
+            def view(self): return ""
+        await Program(Model(), terminal=TerminalSession(io.BytesIO(), io.StringIO(), backend=backend)).run(Source())
+        self.assertEqual(calls, ["input", "terminal"])
         backend = Backend()
         options = TerminalOptions(raw=False, hide_cursor=False, signals=False)
-        await Program(Model(), terminal=TerminalSession(io.BytesIO(), output, options=options, backend=backend)).run([])
+        await Program(Model(), terminal=TerminalSession(io.BytesIO(), io.StringIO(), options=options, backend=backend)).run([])
         self.assertFalse(backend.raw)
         self.assertEqual(backend.restored, [])

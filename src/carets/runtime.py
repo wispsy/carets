@@ -208,6 +208,9 @@ class Program:
         try:
             if self.terminal is not None:
                 self.terminal.start(self)
+            close_source = getattr(source, "aclose", None) or getattr(source, "close", None)
+            if close_source is not None:
+                self.add_cleanup(close_source)
             reader = asyncio.create_task(read())
             for command in commands:
                 self.schedule(command)
