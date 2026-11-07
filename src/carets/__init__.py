@@ -14,6 +14,7 @@ from .runtime import (
     batch,
 )
 from .commands import Command
+from .terminal import TerminalCapabilities, TerminalOptions, TerminalSession
 from .style import Border, Style, truncate_ansi, visual_width
 from .zone import ZoneInfo, ZoneManager, zones
 
@@ -35,6 +36,9 @@ __all__ = [
     "ScreenBuffer",
     "SelectField",
     "Style",
+    "TerminalCapabilities",
+    "TerminalOptions",
+    "TerminalSession",
     "WindowSizeMsg",
     "ZoneInfo",
     "ZoneManager",

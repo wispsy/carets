@@ -77,6 +77,7 @@ class Program:
         input_stream: Any = sys.stdin.buffer,
         output_stream: TextIO = sys.stdout,
         sleep: Callable = asyncio.sleep,
+        terminal: Any = None,
     ) -> None:
         self.model = model
         self.parser = parser
@@ -88,6 +89,7 @@ class Program:
         self._tasks = {}
         self._cleanups = []
         self._sleep = sleep
+        self.terminal = terminal
         self._running = False
         self._used = False
         self._next_command = 0
@@ -204,6 +206,8 @@ class Program:
         reader = None
         failure = None
         try:
+            if self.terminal is not None:
+                self.terminal.start(self)
             reader = asyncio.create_task(read())
             for command in commands:
                 self.schedule(command)
