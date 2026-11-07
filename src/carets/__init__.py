@@ -5,6 +5,7 @@ from .input import AnsiInputParser
 from .renderer import CellDiffRenderer, ScreenBuffer
 from .runtime import (
     BatchMsg,
+    CommandErrorMsg,
     KeyMsg,
     MouseMsg,
     Msg,
@@ -12,6 +13,7 @@ from .runtime import (
     WindowSizeMsg,
     batch,
 )
+from .commands import Command
 from .style import Border, Style, truncate_ansi, visual_width
 from .zone import ZoneInfo, ZoneManager, zones
 
@@ -20,6 +22,8 @@ __all__ = [
     "BatchMsg",
     "Border",
     "CellDiffRenderer",
+    "Command",
+    "CommandErrorMsg",
     "ConfirmField",
     "Form",
     "Group",
