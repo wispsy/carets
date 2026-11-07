@@ -104,6 +104,12 @@ class Program:
             raise TypeError("Expected a Msg")
         self._queue.put_nowait(("message", message))
 
+    async def idle(self):
+        """Drain currently queued deliveries; delayed/background work may remain."""
+        for _ in range(2):
+            await asyncio.sleep(0)
+            await self._queue.join()
+
     def add_cleanup(self, cleanup: Callable) -> None:
         if self._used and not self._running:
             raise RuntimeError("Program is already closed")
@@ -245,6 +251,9 @@ class Program:
                 except BaseException as error:
                     errors.append(error)
             self._running = False
+            while not self._queue.empty():
+                self._queue.get_nowait()
+                self._queue.task_done()
             if errors and failure is None:
                 raise errors[0]
 

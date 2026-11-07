@@ -1,5 +1,10 @@
 # carets
 
+Read the [API reference](docs/api.md), [application tutorials](docs/tutorials.md),
+[testing guide](docs/testing.md) and [compatibility matrix](docs/compatibility.md)
+for the source-qualified application foundation. [Release notes](docs/releases.md)
+distinguish this source work from the published baseline.
+
 > **Prototype / experimental:** Carets is an early dependency-free Python
 > 3.10+ asyncio terminal UI toolkit. Public APIs may change before 1.0.
 
