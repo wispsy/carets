@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import codecs
+import os
 import re
 from collections.abc import AsyncIterator
 from typing import Any
@@ -50,7 +51,12 @@ class AnsiInputParser(AsyncIterator[KeyMsg | MouseMsg]):
         return event
 
     def _on_readable(self) -> None:
-        data = self.stream.read(4096)
+        # BufferedReader.read(size) can wait for size bytes even after readiness.
+        # One descriptor read returns the available raw-terminal bytes instead.
+        try:
+            data = os.read(self.stream.fileno(), 4096)
+        except (BlockingIOError, InterruptedError):
+            return
         if not data:
             self.close()
             return

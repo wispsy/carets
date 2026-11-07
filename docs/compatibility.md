@@ -7,6 +7,7 @@
 | Current installed profiles | Python 3.14 on Linux, macOS and Windows |
 | Terminal lifecycle/focus/forms | Synthetic fixtures on every selected installed platform |
 | POSIX raw restoration | Real pseudo-terminal test on Linux/macOS |
+| Native POSIX buffered stdin | Independent-process pseudo-terminal single-key delivery regression |
 | Native Windows raw/ANSI console | Conservative fallback; no native-console support claim |
 | Redirected streams / TERM=dumb | No unsupported terminal control output |
 
