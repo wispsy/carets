@@ -16,6 +16,7 @@ class Command:
     produce: Callable
     delay: float = 0
     interval: float | None = None
+    streaming: bool = False
 
     def __post_init__(self):
         if not callable(self.produce):
@@ -24,6 +25,20 @@ class Command:
             raise ValueError("Command delay must be finite and nonnegative")
         if self.interval is not None and (not isinstance(self.interval, (int, float)) or not math.isfinite(self.interval) or self.interval <= 0):
             raise ValueError("Tick interval must be finite and positive")
+        if type(self.streaming) is not bool:
+            raise TypeError("Streaming must be a Boolean")
+        if self.streaming and self.interval is not None:
+            raise ValueError("Stream commands cannot repeat")
+
+    @classmethod
+    def stream(cls, factory):
+        """Lazily consume an async message iterable, closing it when finished.
+
+        The factory runs on the Program's event-loop thread. It must return an
+        async iterable (or await one); blocking inference belongs in an adapter.
+        Program's stream_buffer bounds messages waiting for model dispatch.
+        """
+        return cls(factory, streaming=True)
 
     @classmethod
     def after(cls, seconds, message):

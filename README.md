@@ -39,3 +39,7 @@ The longer-term roadmap is documented in
 python -m unittest discover -s tests -v
 python -m compileall -q src tests examples
 ```
+
+Managed async message producers use `Command.stream(factory)`. See the
+[streaming guide](docs/streaming.md) and `examples/streaming.py` for bounded live
+updates, cooperative cancellation and cleanup.

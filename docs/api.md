@@ -21,3 +21,10 @@
 See the linked lifecycle, terminal, focus, forms/services, testing and tutorial
 guides for examples and behavioral limits. The toolkit does not parse or execute
 workflow documents; application libraries supply that behavior.
+
+## Managed streams
+
+`Command.stream(factory)` consumes asynchronous `Msg` producers with cancellation
+and iterator closure. `Program(..., stream_buffer=64)` bounds stream deliveries;
+ordinary `post()` remains compatible. See [streaming](streaming.md) for lifecycle,
+error and buffering semantics.

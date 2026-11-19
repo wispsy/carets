@@ -78,7 +78,10 @@ class Program:
         output_stream: TextIO = sys.stdout,
         sleep: Callable = asyncio.sleep,
         terminal: Any = None,
+        stream_buffer: int = 64,
     ) -> None:
+        if type(stream_buffer) is not int or not 1 <= stream_buffer <= 65536:
+            raise ValueError("Stream buffer must be an integer from 1 to 65536")
         self.model = model
         self.parser = parser
         self.renderer = renderer
@@ -86,6 +89,7 @@ class Program:
         self.output_stream = output_stream
         self._stop = asyncio.Event()
         self._queue = asyncio.Queue()
+        self._stream_slots = asyncio.Semaphore(stream_buffer)
         self._tasks = {}
         self._cleanups = []
         self._sleep = sleep
@@ -129,6 +133,9 @@ class Program:
             try:
                 if command.delay:
                     await self._sleep(command.delay)
+                if command.streaming:
+                    await self._produce_stream(command.produce)
+                    return
                 while True:
                     message = command.produce()
                     if inspect.isawaitable(message):
@@ -149,6 +156,35 @@ class Program:
             self._tasks.pop(identity, None)
         task.add_done_callback(finished)
         return identity
+
+    async def _produce_stream(self, factory):
+        source = factory()
+        if inspect.isawaitable(source):
+            source = await source
+        iterator = aiter(source)
+        try:
+            while not self._stop.is_set():
+                await self._stream_slots.acquire()
+                queued = False
+                try:
+                    try:
+                        message = await anext(iterator)
+                    except StopAsyncIteration:
+                        break
+                    if not isinstance(message, Msg):
+                        raise TypeError("Stream items must be Msg instances")
+                    self._queue.put_nowait(("stream", message))
+                    queued = True
+                finally:
+                    if not queued:
+                        self._stream_slots.release()
+                # Even an async generator without internal awaits must let
+                # input, dispatch and cancellation tasks make progress.
+                await asyncio.sleep(0)
+        finally:
+            close = getattr(iterator, "aclose", None)
+            if close is not None:
+                await close()
 
     def cancel(self, command_id: str) -> bool:
         task = self._tasks.get(command_id)
@@ -224,13 +260,15 @@ class Program:
             while not self._stop.is_set():
                 kind, value = await self._queue.get()
                 try:
-                    if kind == "message":
+                    if kind in ("message", "stream"):
                         await self.dispatch(value)
                     elif kind == "error":
                         raise value
                     elif kind == "eof" and stop_on_eof:
                         self.stop()
                 finally:
+                    if kind == "stream":
+                        self._stream_slots.release()
                     self._queue.task_done()
             return self.model
         except BaseException as error:
@@ -252,7 +290,9 @@ class Program:
                     errors.append(error)
             self._running = False
             while not self._queue.empty():
-                self._queue.get_nowait()
+                kind, _value = self._queue.get_nowait()
+                if kind == "stream":
+                    self._stream_slots.release()
                 self._queue.task_done()
             if errors and failure is None:
                 raise errors[0]
