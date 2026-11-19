@@ -1,0 +1,29 @@
+[project]
+name = "carets"
+version = "0.1.0"
+description = "A Charmbracelet Bubble Tea & Lip Gloss clone in pure Python asyncio"
+readme = "README.md"
+authors = [
+    { name = "ellainng", email = "299958882+ellainng@users.noreply.github.com" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Environment :: Console",
+    "Topic :: Terminals",
+]
+requires-python = ">=3.10"
+dependencies = [
+    # Optional advanced east-asian width support; falls back gracefully if omitted
+    "wcwidth>=0.2.0; platform_python_implementation != 'PyPy'"
+]
+
+[project.urls]
+Homepage = "https://github.com/wispsy/carets"
+
+[tool.setuptools.packages.find]
+where = ["src"]

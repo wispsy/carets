@@ -1,0 +1,17 @@
+{
+  ".gitignore": "ed7b84e816359d17276a801802de5c362c2c572ce3e50a8670c8362b08351380",
+  ".python-version": "a876e0b10411037a012498b9fe18d9bc1df32ed8b722a13564dc944ddcfd9135",
+  "README.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "pyproject.toml": "c862887520c5b52316433e5eac1ae01018fff49e4b66d624de4bdc55f43d212f",
+  "src/carets/__init__.py": "8d1e385f5a73938405acb1a4ff554483edf8d9d934b1ef4b18e7900fc442d608",
+  "src/carets/bubble_cell_renderer.py": "c4aa3bbd17f7e518e9b4b92157bacbc184db3552f7c353a5fccdf771bdf485a6",
+  "src/carets/bubble_input.py": "a8a82e322b0df9a75ad6bc523e90167843dd85991057d1a14bc9b5af9c0c1d4c",
+  "src/carets/bubble_list_spinner.py": "bab1cf582a7aa3b62c43cd8d17b7afbedbba0bc47985f319e9560c2a5346e882",
+  "src/carets/bubble_modal.py": "08905767af22aabdc9a4d5dfd6abce4e9d8194acd29e584c854daa2bc39e2a41",
+  "src/carets/bubble_paste_resize.py": "e1c6df9429827810391623d2e2aa53c0abada869a53b62c4bdb5b53eb13e9020",
+  "src/carets/bubble_zones.py": "42a0bb76f3b046a9fe56925deaafbdb1ccf0da97cc57affd6c222b8260d92db0",
+  "src/carets/bubbles_components.py": "ab9e953b104e9ec6ae45c6cbf52fbb837d97edaa36e0801694148c05e1b86457",
+  "src/carets/huh_form.py": "1a4048d80a594867efa510e24e4ab52f7b4fa5a5cca3d8cde852f526205aa902",
+  "src/carets/main.py": "166e7c8ff7fcc9503e9cd7a5c4dbeb92aed16c7973601f25509dc1d664052217",
+  "src/carets/pylipgloss.py": "026080c64f0ddf029f3d8d67b5ebc3324764e20ed4addd2628e94d31db1e0db6"
+}
