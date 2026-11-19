@@ -3,7 +3,7 @@
 The `seed/` directory preserves the original local project and ten standalone
 terminal experiments, byte for byte. `source-sha256.json` records the source
 inventory. These files predate the maintained package; run individual scripts
-explicitly on POSIX rather than installing the nested project or importing its
+explicitly with Python 3.12+ on POSIX rather than installing the nested project or importing its
 legacy `__init__.py`. Terminal demos take over the current terminal.
 
 The supported package in `src/carets/` supplies the extracted implementations:
