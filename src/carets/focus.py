@@ -132,7 +132,7 @@ class FocusManager:
             return None
         target = self.focused
         if isinstance(message, MouseMsg):
-            target = next((zone.name for zone in reversed(tuple(self.zones)) if zone.contains(message.x, message.y)
+            target = next((zone.name for zone in self.zones if zone.contains(message.x, message.y)
                            and zone.name in self.components and self.components[zone.name].scope == self.active_scope), None)
             if target is not None and not self.components[target].disabled:
                 self.focus(target)
@@ -141,7 +141,8 @@ class FocusManager:
         if target is None:
             return None
         component = self.components[target]
-        if component.disabled or component.read_only:
+        navigation = isinstance(message, KeyMsg) and message.key in ("left", "right", "up", "down", "pageup", "pagedown", "home", "end")
+        if component.disabled or (component.read_only and not navigation):
             return None
         ancestors = []
         parent = component.parent
