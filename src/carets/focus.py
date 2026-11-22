@@ -127,7 +127,7 @@ class FocusManager:
         self._handlers.setdefault((id, phase), []).append(handler)
 
     def route(self, message):
-        if isinstance(message, KeyMsg) and message.key in ("tab", "shift-tab", "backtab"):
+        if isinstance(message, KeyMsg) and message.action != "release" and message.key in ("tab", "shift-tab", "backtab"):
             self.navigate("previous" if message.key != "tab" or "shift" in message.modifiers else "next")
             return None
         target = self.focused
