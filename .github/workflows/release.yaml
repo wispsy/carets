@@ -1,27 +1,45 @@
 name: Release package
-
 on:
   release:
     types: [published]
-
 permissions:
   contents: read
-  id-token: write
-
 jobs:
   build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - name: Check release commit belongs to main
+        run: git merge-base --is-ancestor HEAD origin/main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: python -m pip install uv
+      - run: uv build --out-dir dist
+      - name: Validate tag, metadata, payload and hashes
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python scripts/check_distribution.py dist --tag "$RELEASE_TAG"
+      - run: python scripts/qualify.py dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-distributions
+          path: dist/*
+          if-no-files-found: error
+  publish:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/carets
+    permissions:
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v4
         with:
-          python-version: "3.12"
-      - name: Install build tooling
-        run: python -m pip install --upgrade build
-      - name: Build distributions
-        run: python -m build
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+          name: release-distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
