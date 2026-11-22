@@ -16,10 +16,20 @@ class TerminalOptions:
     mouse: bool = False
     bracketed_paste: bool = False
     signals: bool = True
+    focus_events: bool = False
+    mouse_motion: bool = False
+    keyboard_protocol: str = "legacy"
+    kitty_flags: int = 3
 
     def __post_init__(self):
-        if any(type(getattr(self, name)) is not bool for name in self.__dataclass_fields__):
-            raise TypeError("Terminal options must be booleans")
+        if any(type(getattr(self, name)) is not bool for name in ("raw", "alternate_screen", "hide_cursor", "mouse", "bracketed_paste", "signals", "focus_events", "mouse_motion")):
+            raise TypeError("Terminal mode switches must be booleans")
+        if self.keyboard_protocol not in ("legacy", "auto", "kitty"):
+            raise ValueError("Select legacy, auto or kitty keyboard protocol")
+        if type(self.kitty_flags) is not int or not 1<=self.kitty_flags<=31:
+            raise ValueError("Kitty enhancement flags must be between 1 and 31")
+        if self.mouse_motion and not self.mouse:
+            raise ValueError("Mouse motion requires mouse reporting")
 
 
 @dataclass(frozen=True)
@@ -29,6 +39,7 @@ class TerminalCapabilities:
     resize: bool = False
     ansi: bool = False
     signals: bool = False
+    color_depth: int = 0
 
 
 class SystemTerminal:
@@ -40,7 +51,8 @@ class SystemTerminal:
         posix = os.name == "posix"
         signals = tty and current_thread() is main_thread()
         self.capabilities = TerminalCapabilities(tty, tty and posix, signals and hasattr(signal, "SIGWINCH"),
-                                                  tty and posix and os.environ.get("TERM") != "dumb", signals)
+                                                  tty and posix and os.environ.get("TERM") != "dumb", signals,
+                                                  (24 if os.environ.get("COLORTERM") in ("truecolor", "24bit") else 8 if "256color" in os.environ.get("TERM", "") else 4) if tty and posix and os.environ.get("TERM") != "dumb" else 0)
 
     def size(self):
         try:
@@ -85,6 +97,7 @@ class TerminalSession:
         self._undo = []
         self._owned = False
         self._used = False
+        self._keyboard_enabled = False
 
     def start(self, program):
         if self._used or not _ownership.acquire(blocking=False):
@@ -100,10 +113,14 @@ class TerminalSession:
                 (self.options.hide_cursor, "\x1b[?25l", "\x1b[?25h"),
                 (self.options.mouse, "\x1b[?1000h\x1b[?1006h", "\x1b[?1006l\x1b[?1000l"),
                 (self.options.bracketed_paste, "\x1b[?2004h", "\x1b[?2004l"),
+                (self.options.focus_events, "\x1b[?1004h", "\x1b[?1004l"),
+                (self.options.mouse_motion, "\x1b[?1003h", "\x1b[?1003l"),
             ):
                 if enabled:
                     self._undo.append(leave)
                     self.output_stream.write(enter)
+            if self.options.keyboard_protocol == "kitty": self._enable_keyboard()
+            elif self.options.keyboard_protocol == "auto": self.output_stream.write("\x1b[?u")
             self.output_stream.flush()
         from .runtime import WindowSizeMsg
         def resize():
@@ -114,6 +131,18 @@ class TerminalSession:
                 self._signals.append(self.backend.install_signal("resize", resize))
             for name in ("interrupt", "terminate"):
                 self._signals.append(self.backend.install_signal(name, program.stop))
+
+    def _enable_keyboard(self):
+        if self._keyboard_enabled:return
+        self._undo.append("\x1b[<u")
+        self.output_stream.write(f"\x1b[>{self.options.kitty_flags}u")
+        self.output_stream.flush();self._keyboard_enabled=True
+
+    def handle_message(self, message):
+        from .runtime import ProtocolMsg
+        if (self._owned and self.capabilities.ansi and self.options.keyboard_protocol=="auto"
+                and isinstance(message,ProtocolMsg) and message.protocol=="kitty"):
+            self._enable_keyboard()
 
     def close(self):
         if not self._owned:
