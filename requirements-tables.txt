@@ -1,0 +1,3 @@
+# Optional snapshot adapter qualification on Python 3.14+. The published 0.1.0
+# predates TableSnapshot. Keep this development pin separate from PyPI metadata.
+headless-spreadsheets @ git+https://github.com/wispsy/headless_spreadsheets.git@811f1e1b297cacb887164bcb78ba6be39e37c90d
