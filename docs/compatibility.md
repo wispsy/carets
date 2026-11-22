@@ -14,7 +14,10 @@
 SIGWINCH is used only where available; process signal handlers require the main
 thread. Input add_reader support depends on the event loop/platform. Windows apps
 can supply synthetic or application-owned message sources; the default native
-Windows console input path is not qualified. Unicode cell-width calculation is
-an approximation and does not promise full emoji/grapheme shaping. Optional
-constraint layout, advanced protocol coverage and richer widgets retain their
-own roadmap issues. No global input listener is installed.
+Windows console input path is not qualified. Grapheme segmentation uses bundled
+Unicode 18 data and passes its official conformance fixture. Cell width follows
+the documented policy and does not promise font-dependent shaping. Constraint
+layout, incremental input protocols, frame coalescing and component/theme/shell
+contracts ship in 0.2.0. The full widget backlog remains in issue #7. The optional
+Headless Spreadsheets snapshot integration is separately qualified on Python
+3.14 on Linux/macOS/Windows. No global input listener is installed.
