@@ -15,7 +15,7 @@ class Viewport:
     offset: int = 0
 
     def update(self, msg: Msg) -> "Viewport":
-        if not isinstance(msg, KeyMsg):
+        if (not isinstance(msg, KeyMsg) or msg.action == "release"):
             return self
         lines = self.content.splitlines()
         maximum = max(0, len(lines) - self.height)
