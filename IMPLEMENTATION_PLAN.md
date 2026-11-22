@@ -115,3 +115,73 @@ Each milestone should land as small, reviewable issues with tests and focused
 documentation. Breaking changes should be called out in release notes. The
 package remains dependency-free unless an optional integration is explicitly
 isolated behind an extra.
+
+## Application completion and Carets v0.2.0 — 22 November 2026
+
+Owner-selected scope: complete the Hypnosis application portion of Cohesion Block B
+and Carets foundations leading to #7. Ollama remains deferred. Version 0.2.0 is a
+component-library foundation; #7 remains the growing widget backlog. Release and
+publication are explicitly authorized after verification.
+
+### Delivery order and acceptance
+
+1. Carets #3: immutable size/constraint/rect/layout nodes, rows, columns, stacks,
+   overlays/splits, fixed/weighted/percentage/content sizing, limits, padding,
+   margins, gaps/alignment and bounded clipping. Content measurement does not
+   depend on the parent. Test nested resize, deterministic allocation, shortage,
+   zero dimensions and identity-derived zones.
+2. Carets #5: one grapheme/width/clipping path shared by style, cells and layout;
+   retain dependency-free core with pinned Unicode property data and conformance
+   fixtures. Explicit terminal-width policy covers emoji/ZWJ, combining text,
+   flags, wide cells and ambiguous width. Add color fallback, cursor ownership,
+   layer composition, resize/full redraw and immutable previous-frame snapshots.
+3. Carets #6: incremental CSI/SS3/function/modifier keys, explicit Kitty protocol
+   negotiation/events, focus reports, complete SGR mouse actions and bounded
+   paste/malformed input. Preserve fragmented UTF-8 and subsequent input. Terminal
+   modes are opted into, owned and restored by the existing session.
+4. CARET-FRAME-01: optional bounded frame scheduling with serialized lossless
+   updates, deterministic clock tests, responsive input and final flush; immediate
+   rendering remains the default.
+5. CARET-DS-01/#7 foundation: shared immutable component sizing/state/accessibility
+   contracts, theme roles/spacing, reusable shell regions and initial controls.
+   Adapt existing controls rather than creating another rendering/focus lifecycle.
+   Demonstrate Hypnosis and an independent dashboard under narrow/Unicode/modal
+   conditions. Keep the complete future widget list open in #7.
+6. CARET-TABLE-01: bounded read-only table viewport over public Headless Spreadsheets
+   snapshots, stable source/row/column/revision identity, keyboard selection and
+   virtualization. Storage and revision-checked edits stay in source adapters.
+7. HYP-TOOLS-01: selected Hidden Moves catalog, typed requests, application-owned
+   authority, finite arguments/results, structural receipts and explicit uncertain
+   effects/cancellation. Never reimplement schema dispatch or activate providers
+   from retrieved text.
+8. HYP-CONTEXT-01: explicit Workspace selections and trusted instruction inputs,
+   bounded UTF-8 bytes and caller tokenizer budgets, source/hash/truncation records,
+   stale-source handling and held-out retrieval fixtures. Reuse Workspace and Parse
+   MD; private context stays out of structural receipts.
+9. HYP-VERIFY-01: caller-selected real verifier outcomes, finite repair attempts and
+   shared time/output/tool authority. Cover pass, repaired pass, exhausted limits,
+   verifier errors and cancellation. Keep workspace diff/provenance references
+   inspectable without automatically executing generated code.
+10. HYP-OPT-01: deterministic finite configuration trials and immutable task/provider/
+    config identities, held-out regression gates and explicit candidate selection.
+    Reuse Backpack receipts; no implicit weight training or automatic promotion.
+11. HYP-ORCH-01: explicit role/dependency DAGs, admission and shared resource/time/
+    output budgets with existing func_seq seams. Sequential scheduling by default;
+    cancellation, blocked dependents and model resource serialization are explicit.
+12. Integrate the same application services into CLI and Carets, with job/tool/context/
+    verification/trial views. Keep terminal output bounded, use shared shell/theme/
+    table components, preserve one terminal owner and keep JSON stdout separate.
+13. Finish installed app-family qualification and public source pins. Run focused
+    tests for each change, source and wheel checks, Linux/macOS/Windows headless
+    checks and POSIX native-terminal evidence. Preserve all existing datasets,
+    checkpoints and source profiles; no new long training session is selected.
+14. Prepare v0.2.0 metadata, release notes, migration/component-author guidance,
+    compatibility limits and verified wheel/source hashes. Publish the requested
+    release through the verified existing GitHub/PyPI path and check uploaded
+    artifacts. No dependent package release is implied.
+
+Use focused branches/PRs in rolling batches. Fold stacked children into parents
+before main, retain passing current-head evidence and update the Project/issues
+at integration. Keep numerical training in Thoughtformula, recipes/artifacts in
+Thoughtform, capability dispatch in Hidden Moves, storage in Backpack, scheduling
+in func_seq and document/table semantics in their owning libraries.
