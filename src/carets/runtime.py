@@ -20,6 +20,19 @@ class KeyMsg(Msg):
     key: str
     text: str | None = None
     modifiers: frozenset[str] = field(default_factory=frozenset)
+    action: str = "press"
+    truncated: bool = False
+
+
+@dataclass(frozen=True)
+class FocusMsg(Msg):
+    focused: bool
+
+
+@dataclass(frozen=True)
+class ProtocolMsg(Msg):
+    protocol: str
+    value: int = 0
 
 
 @dataclass(frozen=True)
@@ -205,6 +218,9 @@ class Program:
     async def dispatch(self, msg: Msg) -> None:
         messages = msg.messages if isinstance(msg, BatchMsg) else (msg,)
         for item in messages:
+            if self.terminal is not None:
+                handle = getattr(self.terminal, "handle_message", None)
+                if handle is not None: handle(item)
             result = self.model.update(item)
             if inspect.isawaitable(result):
                 result = await result

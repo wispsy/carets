@@ -8,6 +8,8 @@ from .runtime import (
     BatchMsg,
     CommandErrorMsg,
     KeyMsg,
+    FocusMsg,
+    ProtocolMsg,
     MouseMsg,
     Msg,
     Program,
@@ -63,3 +65,5 @@ from .layout import Constraints, Insets, Layout, LayoutResult, Length, Rect, Siz
 __all__ += ["Constraints", "Insets", "Layout", "LayoutResult", "Length", "Rect", "Size", "Leaf", "Row", "Column", "Stack", "Overlay", "Split", "fixed", "weighted", "percent", "content"]
 
 __all__ += ["Cursor"]
+
+__all__ += ["FocusMsg", "ProtocolMsg"]

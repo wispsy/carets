@@ -22,7 +22,7 @@ class ListModel(Generic[T]):
         object.__setattr__(self, "title", title)
 
     def update(self, msg: Msg) -> "ListModel[T]":
-        if not isinstance(msg, KeyMsg) or not self.items:
+        if (not isinstance(msg, KeyMsg) or msg.action == "release") or not self.items:
             return self
         if msg.key in ("up", "k"):
             return replace(self, selected=max(0, self.selected - 1))
