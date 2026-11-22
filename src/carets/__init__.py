@@ -1,5 +1,7 @@
 # Public package exports for the carets asyncio terminal UI toolkit.
 
+__version__ = "0.2.0"
+
 from .huh import ConfirmField, Form, FormResult, Group, InputField, SelectField, TypedField
 from .services import ApplicationContext, load_config
 from .input import AnsiInputParser
