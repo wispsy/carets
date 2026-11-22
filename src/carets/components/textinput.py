@@ -15,7 +15,7 @@ class TextInput:
     focused: bool = True
 
     def update(self, msg: Msg) -> "TextInput":
-        if not self.focused or not isinstance(msg, KeyMsg):
+        if not self.focused or (not isinstance(msg, KeyMsg) or msg.action == "release"):
             return self
         if msg.key == "left":
             return replace(self, cursor=max(0, self.cursor - 1))

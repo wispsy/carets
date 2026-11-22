@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import math
+import time
 import sys
 from dataclasses import dataclass, field
 from typing import Any, AsyncIterable, Callable, Iterable, Protocol, TextIO
@@ -20,6 +22,19 @@ class KeyMsg(Msg):
     key: str
     text: str | None = None
     modifiers: frozenset[str] = field(default_factory=frozenset)
+    action: str = "press"
+    truncated: bool = False
+
+
+@dataclass(frozen=True)
+class FocusMsg(Msg):
+    focused: bool
+
+
+@dataclass(frozen=True)
+class ProtocolMsg(Msg):
+    protocol: str
+    value: int = 0
 
 
 @dataclass(frozen=True)
@@ -79,9 +94,18 @@ class Program:
         sleep: Callable = asyncio.sleep,
         terminal: Any = None,
         stream_buffer: int = 64,
+        frame_interval: float = 0,
+        clock: Callable = time.monotonic,
     ) -> None:
         if type(stream_buffer) is not int or not 1 <= stream_buffer <= 65536:
             raise ValueError("Stream buffer must be an integer from 1 to 65536")
+        if type(frame_interval) not in (int, float) or not math.isfinite(frame_interval) or not 0 <= frame_interval <= 60:
+            raise ValueError("Frame interval must be finite and between zero and sixty seconds")
+        self._frame_interval, self._clock = frame_interval, clock
+        self._frame_task = None
+        self._frame_tasks = set()
+        self._last_render = None
+        self._dirty = False
         self.model = model
         self.parser = parser
         self.renderer = renderer
@@ -193,6 +217,29 @@ class Program:
         task.cancel()
         return True
 
+    async def _request_render(self):
+        self._dirty = True
+        elapsed = float('inf') if self._last_render is None else self._clock()-self._last_render
+        if not self._frame_interval or elapsed >= self._frame_interval:
+            if self._frame_task is not None:
+                self._frame_task.cancel(); self._frame_task = None
+            await self.render()
+        elif self._frame_task is None:
+            async def wake():
+                await self._sleep(max(0, self._frame_interval-elapsed))
+                self._queue.put_nowait(("frame", asyncio.current_task()))
+            task = self._frame_task = asyncio.create_task(wake())
+            self._frame_tasks.add(task)
+            task.add_done_callback(self._frame_tasks.discard)
+
+    async def _close_renderer(self):
+        close = getattr(self.renderer, "close", None)
+        if close is not None:
+            result = close()
+            if inspect.isawaitable(result): result = await result
+            if isinstance(result, str) and result:
+                self.output_stream.write(result); self.output_stream.flush()
+
     async def render(self):
         if self.renderer is not None:
             rendered = self.renderer.render(self.model.view())
@@ -201,10 +248,15 @@ class Program:
             if rendered is not None:
                 self.output_stream.write(str(rendered))
                 self.output_stream.flush()
+        self._dirty = False
+        self._last_render = self._clock()
 
     async def dispatch(self, msg: Msg) -> None:
         messages = msg.messages if isinstance(msg, BatchMsg) else (msg,)
         for item in messages:
+            if self.terminal is not None:
+                handle = getattr(self.terminal, "handle_message", None)
+                if handle is not None: handle(item)
             result = self.model.update(item)
             if inspect.isawaitable(result):
                 result = await result
@@ -213,7 +265,9 @@ class Program:
             elif isinstance(result, (tuple, list)) and all(isinstance(command, Command) for command in result):
                 for command in result:
                     self.schedule(command)
-            await self.render()
+            elif result is not None and callable(getattr(result, "update", None)) and callable(getattr(result, "view", None)):
+                self.model = result
+            await self._request_render()
 
     async def run(
         self,
@@ -250,6 +304,7 @@ class Program:
         try:
             if self.terminal is not None:
                 self.terminal.start(self)
+            self.add_cleanup(self._close_renderer)
             close_source = getattr(source, "aclose", None) or getattr(source, "close", None)
             if close_source is not None:
                 self.add_cleanup(close_source)
@@ -262,6 +317,9 @@ class Program:
                 try:
                     if kind in ("message", "stream"):
                         await self.dispatch(value)
+                    elif kind == "frame" and value is self._frame_task:
+                        self._frame_task = None
+                        if self._dirty: await self.render()
                     elif kind == "error":
                         raise value
                     elif kind == "eof" and stop_on_eof:
@@ -275,12 +333,15 @@ class Program:
             failure = error
             raise
         finally:
-            tasks = [*self._tasks.values(), *([reader] if reader is not None else [])]
+            tasks = [*self._frame_tasks, *self._tasks.values(), *([reader] if reader is not None else [])]
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
             cleanups, self._cleanups = self._cleanups, []
             errors = []
+            if self._dirty:
+                try: await self.render()
+                except BaseException as error: errors.append(error)
             for cleanup in reversed(cleanups):
                 try:
                     result = cleanup()

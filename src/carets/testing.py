@@ -76,7 +76,7 @@ class SnapshotRenderer:
         self.frames = []
 
     def render(self, view):
-        self.frames.append(str(view))
+        self.frames.append(view.to_text() if hasattr(view, "to_text") else str(view))
         return ""
 
     @property
@@ -93,14 +93,14 @@ def assert_layout(zones, width, height):
 class TestProgram:
     """Async context manager; send inputs, advance time and assert plain frames."""
 
-    def __init__(self, model, *, terminal=None, clock=None):
+    def __init__(self, model, *, terminal=None, clock=None, frame_interval=0):
         self.model = model
         self.terminal = terminal if terminal is not None else FakeTerminal()
         self.clock = clock if clock is not None else ManualClock()
         self.renderer = SnapshotRenderer()
         self.parser = AnsiInputParser()
         self.program = Program(model, renderer=self.renderer, output_stream=self.terminal.output,
-            sleep=self.clock.sleep, terminal=TerminalSession(self.terminal.input, self.terminal.output, backend=self.terminal))
+            sleep=self.clock.sleep, clock=lambda: self.clock.now, frame_interval=frame_interval, terminal=TerminalSession(self.terminal.input, self.terminal.output, backend=self.terminal))
         self.task = None
 
     async def __aenter__(self):
