@@ -14,7 +14,7 @@ class Spinner:
     active: bool = True
 
     def update(self, msg: Msg) -> "Spinner":
-        if isinstance(msg, KeyMsg) and msg.key in ("tick", "space"):
+        if self.frames and isinstance(msg, KeyMsg) and msg.action != "release" and msg.key in ("tick", "space"):
             return replace(self, frame=(self.frame + 1) % len(self.frames))
         return self
 
