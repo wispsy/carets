@@ -10,3 +10,6 @@ from .controls import Label, Button, Checkbox, Progress
 __all__ = ["ListModel", "Spinner", "TextInput", "Viewport"]
 __all__ += ["Component", "ComponentState", "ComponentAdapter", "Label", "Button", "Checkbox", "Progress"]
 
+from .table import TableModel, TableSelection
+__all__ += ["TableModel", "TableSelection"]
+

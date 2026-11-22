@@ -3,5 +3,6 @@ recursive-include examples *.py
 recursive-include scripts *.py
 recursive-include tests *.py
 include UNICODE_LICENSE.txt
+include requirements-tables.txt
 recursive-include tests/fixtures *.txt
 recursive-include docs *.json
