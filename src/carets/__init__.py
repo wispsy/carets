@@ -67,3 +67,6 @@ __all__ += ["Constraints", "Insets", "Layout", "LayoutResult", "Length", "Rect",
 __all__ += ["Cursor"]
 
 __all__ += ["FocusMsg", "ProtocolMsg"]
+
+from .shell import AppShell, ShellCommand, ShellFrame, Theme
+__all__ += ["AppShell", "ShellCommand", "ShellFrame", "Theme"]
