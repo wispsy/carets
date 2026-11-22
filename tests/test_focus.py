@@ -56,3 +56,33 @@ class FocusTests(unittest.TestCase):
         focus.set_state("b", disabled=True)
         focus.route(MouseMsg(6, 1))
         self.assertEqual(focus.focused, "a")
+
+    def test_layout_overlap_priority_and_read_only_component_navigation(self):
+        from dataclasses import replace
+        from carets import Stack, Leaf
+        from carets.components import ComponentAdapter, ComponentState, ListModel
+        layout = Stack('root', Leaf('back'), Leaf('front')).arrange(20, 5)
+        focus, calls = FocusManager(layout.zones()), []
+        focus.register('back')
+        focus.register('front')
+        focus.on('back', 'target', lambda event: calls.append('back'))
+        focus.on('front', 'target', lambda event: calls.append('front'))
+        focus.route(MouseMsg(3, 2))
+        self.assertEqual((layout.hit(3, 2), layout.zones().hit(3, 2).name, focus.focused), ('front',)*3)
+        self.assertEqual(calls, ['front'])
+        focus.set_state('front', disabled=True)
+        focus.route(MouseMsg(3, 2))
+        self.assertEqual(calls, ['front'])
+        focus.set_state('front', disabled=False, read_only=True)
+        focus.focus('front')
+        model = ComponentAdapter(ListModel(('a', 'b')), ComponentState('front', focused=True, read_only=True))
+        def update(event):
+            nonlocal model
+            model = model.update(event.message)
+        focus.on('front', 'target', update)
+        focus.route(KeyMsg('down'))
+        self.assertEqual(model.model.selected, 1)
+        count = len(calls)
+        focus.route(KeyMsg('x', 'x'))
+        focus.route(KeyMsg('enter'))
+        self.assertEqual(len(calls), count)

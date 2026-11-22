@@ -16,3 +16,12 @@ route sends events through ancestor capture, target, then ancestor bubble handle
 Handlers receive FocusEvent(message, target, current, phase); event.stop() or a
 truthy handler result stops propagation. Default tab navigation is consumed before
 routing. Application models call route from update; no second input loop is added.
+# Layout and read-only navigation
+
+FocusManager consumes ZoneManager's first-match hit priority. LayoutResult.zones()
+orders foreground regions first, so layout hit-testing, zone hit-testing and
+pointer focus agree. Manually defined overlapping zones should likewise declare
+their intended foreground first. A disabled foreground control blocks dispatch
+and click-through. Read-only targets suppress edits and activation but allow
+Left/Right/Up/Down/PageUp/PageDown/Home/End navigation for compatible components.
+
